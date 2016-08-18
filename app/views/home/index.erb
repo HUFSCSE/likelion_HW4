@@ -1,0 +1,58 @@
+<div class="container">
+  <a href="/users/sign_out">Log_out</a>
+  
+  <form style="margin-top:40px;" action="/home/write" 
+            enctype="multipart/form-data" method="POST">
+    <div class="form-group">
+      <label >Tilte</label>
+      <input type="text" id="title" name="title" class="form-control" placeholder="title">
+    </div>
+    <textarea class="form-control" rows="5" id="content" name="content"></textarea>
+    <input type="file" name="pic" accept="image/*"><br>
+    <button type="submit" class="btn btn-default">Submit</button>
+  </form>
+  
+  <% @posts.each do |p| %>
+    <div class="well">
+      <%= p.title %><br>
+      <%= p.user.email %><br>
+      <%= p.content %><br>
+      <%  unless p.image_url.nil? %>
+        <img src="<%= p.image_url %>">
+      <% end %>
+      <br>
+      <div id="reply_content_<%= p.id %>">
+        <% p.replies.each do |r| %>
+          <%= r.r_content %><br>
+        <% end %>
+      </div>
+      
+      
+       <textarea class="form-control" rows="3" name="r_content" id="reply_<%= p.id %>"></textarea>
+      <button value="<%= p.id %>"type="submit" class="btn btn-default reply_submit">Submit</button>
+    </div>
+  <% end %>
+</div>
+
+<script>
+$(function(){
+  $(".reply_submit").click(function(){
+    post_id = this.value;
+    r_content = $("#reply_"+post_id).val();
+    
+    $.ajax({
+      method: "POST",
+      url: "/home/reply_write",
+      data: {r_content: r_content, p_id: post_id },
+      success: function(){
+         $("#reply_content_"+post_id).append( "<p>"+r_content+"</p>" );
+         $("#reply_"+post_id).val('');
+       },
+       error: function(){
+         $("#reply_content_"+post_id).append( "<p>"+r_content+"</p>" );
+          $("#reply_"+post_id).val('');
+       }
+     })
+  });
+});
+</script>
